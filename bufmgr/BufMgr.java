@@ -33,7 +33,6 @@ public class BufMgr implements GlobalConst {
   public BufMgr(int numframes) {
 
     throw new UnsupportedOperationException("Not implemented");
-    //Added this comment to make sure that it flows with git
 
   } // public BufMgr(int numframes)
 
