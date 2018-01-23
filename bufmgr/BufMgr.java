@@ -34,21 +34,30 @@ public class BufMgr implements GlobalConst {
    */
   public BufMgr(int numframes) {
 
-    if(numframes < 0) {
 
-      throw new UnsupportedOperationException("Number of page frames in buffer pool cannot be less than 0");
+    try {
+
+      if(numframes < 0) {
+
+        throw new IndexOutOfBoundsException();
+
+      }
+
+      buffer_pool = new Page[numframes];
+
+    }
+    catch(IndexOutOfBoundsException e) {
+
+      System.out.println(e.getMessage());
 
     }
 
-    buffer_pool = new Page[numframes];
     for(int i = 0; i < numframes; ++i) {
 
       buffer_pool[i] = new Page();
 
     }
-
-    //throw new UnsupportedOperationException("Not implemented");
-
+    
   } // public BufMgr(int numframes)
 
   /**
