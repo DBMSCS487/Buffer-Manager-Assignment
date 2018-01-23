@@ -1,11 +1,15 @@
 package global;
+import bufmgr.*;
 
 /**
  * Image of a disk page in memory.
  */
 public class Page implements GlobalConst {
 
+  private FrameDesc frametab;
+
   /** The actual byte array for the page. */
+
   protected byte[] data;
 
   // --------------------------------------------------------------------------
@@ -14,6 +18,7 @@ public class Page implements GlobalConst {
    * Default constructor; creates a blank page.
    */
   public Page() {
+    frametab = null;
     data = new byte[PAGE_SIZE];
   }
 

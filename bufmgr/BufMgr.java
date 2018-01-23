@@ -24,7 +24,6 @@ import java.util.HashMap;
  */
 public class BufMgr implements GlobalConst {
 
-
   private Page[] buffer_pool;
 
   /**
@@ -33,8 +32,6 @@ public class BufMgr implements GlobalConst {
    * @param numframes number of frames in the buffer pool
    */
   public BufMgr(int numframes) {
-
-
     try {
 
       if(numframes < 0) {
@@ -57,7 +54,7 @@ public class BufMgr implements GlobalConst {
       buffer_pool[i] = new Page();
 
     }
-    
+
   } // public BufMgr(int numframes)
 
   /**
@@ -90,7 +87,7 @@ public class BufMgr implements GlobalConst {
    */
   public void pinPage(PageId pageno, Page mempage, int contents) {
 
-	throw new UnsupportedOperationException("Not implemented");
+	//throw new UnsupportedOperationException("Not implemented");
 
   } // public void pinPage(PageId pageno, Page page, int contents)
   
@@ -104,7 +101,7 @@ public class BufMgr implements GlobalConst {
    */
   public void unpinPage(PageId pageno, boolean dirty) {
 
-    throw new UnsupportedOperationException("Not implemented");
+    //throw new UnsupportedOperationException("Not implemented");
 
   } // public void unpinPage(PageId pageno, boolean dirty)
   
@@ -121,7 +118,9 @@ public class BufMgr implements GlobalConst {
    */
   public PageId newPage(Page firstpg, int run_size) {
 
-    throw new UnsupportedOperationException("Not implemented");
+    //throw new UnsupportedOperationException("Not implemented");
+    PageId p = new PageId(100);
+    return p;
 
   } // public PageId newPage(Page firstpg, int run_size)
 
@@ -133,7 +132,7 @@ public class BufMgr implements GlobalConst {
    */
   public void freePage(PageId pageno) {
 
-    throw new UnsupportedOperationException("Not implemented");
+    //throw new UnsupportedOperationException("Not implemented");
 
   } // public void freePage(PageId firstid)
 
@@ -145,7 +144,7 @@ public class BufMgr implements GlobalConst {
    */
   public void flushAllFrames() {
 
-    throw new UnsupportedOperationException("Not implemented");
+    //throw new UnsupportedOperationException("Not implemented");
 
   } // public void flushAllFrames()
 
@@ -156,7 +155,7 @@ public class BufMgr implements GlobalConst {
    */
   public void flushPage(PageId pageno) {
 	  
-	throw new UnsupportedOperationException("Not implemented");
+	//throw new UnsupportedOperationException("Not implemented");
     
   }
 
@@ -164,14 +163,17 @@ public class BufMgr implements GlobalConst {
    * Gets the total number of buffer frames.
    */
   public int getNumFrames() {
-    throw new UnsupportedOperationException("Not implemented");
+
+    //throw new UnsupportedOperationException("Not implemented");
+    return 1;
   }
 
   /**
    * Gets the total number of unpinned buffer frames.
    */
   public int getNumUnpinned() {
-    throw new UnsupportedOperationException("Not implemented");
+    //throw new UnsupportedOperationException("Not implemented");
+    return 1;
   }
 
 } // public class BufMgr implements GlobalConst
