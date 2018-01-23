@@ -25,6 +25,8 @@ import java.util.HashMap;
 public class BufMgr implements GlobalConst {
 
 
+  private Page[] buffer_pool;
+
   /**
    * Constructs a buffer manager by initializing member data.  
    * 
@@ -32,7 +34,20 @@ public class BufMgr implements GlobalConst {
    */
   public BufMgr(int numframes) {
 
-    throw new UnsupportedOperationException("Not implemented");
+    if(numframes < 0) {
+
+      throw new UnsupportedOperationException("Number of page frames in buffer pool cannot be less than 0");
+
+    }
+
+    buffer_pool = new Page[numframes];
+    for(int i = 0; i < numframes; ++i) {
+
+      buffer_pool[i] = new Page();
+
+    }
+
+    //throw new UnsupportedOperationException("Not implemented");
 
   } // public BufMgr(int numframes)
 
