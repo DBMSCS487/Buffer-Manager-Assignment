@@ -6,6 +6,8 @@ import bufmgr.*;
  */
 public class Page implements GlobalConst {
 
+
+  /** Each page contains a frame descriptor. */
   private FrameDesc frametab;
 
   /** The actual byte array for the page. */
