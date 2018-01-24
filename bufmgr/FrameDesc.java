@@ -1,6 +1,8 @@
 package bufmgr;
 
 
+import global.Page;
+
 import java.util.HashMap;
 
 /**
@@ -12,10 +14,14 @@ public class FrameDesc{
     private boolean valid; // does it include valid data
     private int diskPageNumber; // if the data is valid, there is should be a number
     private int pinCount;
-    HashMap DUH_HASH;
+    Page aPage;
+
+    //TODO add more data items for clock algorithm
 
     //Default constructor
     public FrameDesc(){
+
+        aPage = null;
         dirty = false;
         valid = false;
         diskPageNumber = -1;
