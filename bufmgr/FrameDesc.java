@@ -14,6 +14,7 @@ public class FrameDesc{
     private int pinCount;
     HashMap DUH_HASH;
 
+    //Default constructor
     public FrameDesc(){
         dirty = false;
         valid = false;

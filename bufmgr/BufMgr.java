@@ -32,6 +32,7 @@ public class BufMgr implements GlobalConst {
    * @param numframes number of frames in the buffer pool
    */
   public BufMgr(int numframes) {
+
     try {
 
       if(numframes < 0) {
