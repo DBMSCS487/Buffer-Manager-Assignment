@@ -1,14 +1,9 @@
 package global;
-import bufmgr.*;
 
 /**
  * Image of a disk page in memory.
  */
 public class Page implements GlobalConst {
-
-
-  /** Each page contains a frame descriptor. */
-  private FrameDesc frametab;
 
   /** The actual byte array for the page. */
 
@@ -20,7 +15,7 @@ public class Page implements GlobalConst {
    * Default constructor; creates a blank page.
    */
   public Page() {
-    frametab = null;
+
     data = new byte[PAGE_SIZE];
   }
 

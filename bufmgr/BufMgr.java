@@ -24,7 +24,9 @@ import java.util.HashMap;
  */
 public class BufMgr implements GlobalConst {
 
-  private Page[] buffer_pool;
+
+    private FrameDesc [] frametab;
+  //private Page[] buffer_pool;
 
   /**
    * Constructs a buffer manager by initializing member data.  
@@ -41,7 +43,7 @@ public class BufMgr implements GlobalConst {
 
       }
 
-      buffer_pool = new Page[numframes];
+      frametab = new FrameDesc[numframes];
 
     }
     catch(IndexOutOfBoundsException e) {
@@ -52,7 +54,7 @@ public class BufMgr implements GlobalConst {
 
     for(int i = 0; i < numframes; ++i) {
 
-      buffer_pool[i] = new Page();
+      frametab[i] = new FrameDesc();
 
     }
 
