@@ -16,7 +16,6 @@ public class FrameDesc{
     private int pinCount;
     Page aPage;
 
-    //TODO add more data items for clock algorithm
 
     // variable for the clock algorithm to give the frame a "second chance"
     boolean refbit;

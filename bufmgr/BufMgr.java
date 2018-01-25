@@ -26,9 +26,8 @@ public class BufMgr implements GlobalConst {
 
 
     private FrameDesc [] frametab;
-    private int numFrames;
+    private int numframes;
     private Clock replPolicy;
-  //private Page[] buffer_pool;
 
   /**
    * Constructs a buffer manager by initializing member data.  
@@ -44,9 +43,6 @@ public class BufMgr implements GlobalConst {
         throw new IndexOutOfBoundsException();
 
       }
-
-      frametab = new FrameDesc[numframes];
-
     }
     catch(IndexOutOfBoundsException e) {
 
@@ -54,14 +50,16 @@ public class BufMgr implements GlobalConst {
 
     }
 
+    frametab = new FrameDesc[numframes];
+
     for(int i = 0; i < numframes; ++i) {
 
       frametab[i] = new FrameDesc();
 
     }
 
-    numFrames = numframes;
-    replPolicy = new Clock();
+    this.numframes = numframes;
+    this.replPolicy = new Clock();
 
   } // public BufMgr(int numframes)
 
@@ -109,7 +107,6 @@ public class BufMgr implements GlobalConst {
    */
   public void unpinPage(PageId pageno, boolean dirty) {
 
-    //throw new UnsupportedOperationException("Not implemented");
 
   } // public void unpinPage(PageId pageno, boolean dirty)
   
@@ -126,9 +123,7 @@ public class BufMgr implements GlobalConst {
    */
   public PageId newPage(Page firstpg, int run_size) {
 
-    //throw new UnsupportedOperationException("Not implemented");
-    PageId p = new PageId(100);
-    return p;
+    return null;
 
   } // public PageId newPage(Page firstpg, int run_size)
 
@@ -140,7 +135,6 @@ public class BufMgr implements GlobalConst {
    */
   public void freePage(PageId pageno) {
 
-    //throw new UnsupportedOperationException("Not implemented");
 
   } // public void freePage(PageId firstid)
 
@@ -152,7 +146,6 @@ public class BufMgr implements GlobalConst {
    */
   public void flushAllFrames() {
 
-    //throw new UnsupportedOperationException("Not implemented");
 
   } // public void flushAllFrames()
 
@@ -163,8 +156,8 @@ public class BufMgr implements GlobalConst {
    */
   public void flushPage(PageId pageno) {
 	  
-	//throw new UnsupportedOperationException("Not implemented");
-    
+
+
   }
 
    /**
@@ -172,14 +165,14 @@ public class BufMgr implements GlobalConst {
    */
   public int getNumFrames() {
 
-    return numFrames;
+    return this.numframes;
   }
 
   /**
    * Gets the total number of unpinned buffer frames.
    */
   public int getNumUnpinned() {
-    //throw new UnsupportedOperationException("Not implemented");
+
     return 1;
   }
 
