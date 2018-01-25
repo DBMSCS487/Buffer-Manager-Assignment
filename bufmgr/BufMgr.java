@@ -26,6 +26,8 @@ public class BufMgr implements GlobalConst {
 
 
     private FrameDesc [] frametab;
+    private int numFrames;
+    private Clock replPolicy;
   //private Page[] buffer_pool;
 
   /**
@@ -57,6 +59,9 @@ public class BufMgr implements GlobalConst {
       frametab[i] = new FrameDesc();
 
     }
+
+    numFrames = numframes;
+    replPolicy = new Clock();
 
   } // public BufMgr(int numframes)
 
@@ -90,7 +95,7 @@ public class BufMgr implements GlobalConst {
    */
   public void pinPage(PageId pageno, Page mempage, int contents) {
 
-	//throw new UnsupportedOperationException("Not implemented");
+      int frameno = replPolicy.pickVictim(frametab);
 
   } // public void pinPage(PageId pageno, Page page, int contents)
   
@@ -167,8 +172,7 @@ public class BufMgr implements GlobalConst {
    */
   public int getNumFrames() {
 
-    //throw new UnsupportedOperationException("Not implemented");
-    return 1;
+    return numFrames;
   }
 
   /**
