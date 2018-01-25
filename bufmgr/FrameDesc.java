@@ -18,17 +18,42 @@ public class FrameDesc{
 
     //TODO add more data items for clock algorithm
 
-    //Default constructor
+    // variable for the clock algorithm to give the frame a "second chance"
+    boolean refbit;
+
+
+    /** Default constructor */
     public FrameDesc(){
 
-        aPage = null;
+        aPage = new Page();
         dirty = false;
         valid = false;
         diskPageNumber = -1;
         pinCount = -1;
+        refbit = true;
     }
 
+    /** Gives back the boolean value of if the frame contains data */
+    public boolean getValid() {
 
+        return valid;
+    }
+
+    /** Gives back the pincount of the frame */
+    public int getPinCount() {
+
+        return pinCount;
+    }
+
+    public boolean getRefbit() {
+
+        return refbit;
+    }
+
+    public void setRefbit(boolean refbit) {
+
+        this.refbit = refbit;
+    }
 
 
 }
