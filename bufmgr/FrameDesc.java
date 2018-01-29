@@ -3,7 +3,6 @@ package bufmgr;
 
 import global.Page;
 
-import java.util.HashMap;
 
 /**
  * Created by brandonbauley on 1/23/18.
@@ -32,6 +31,19 @@ public class FrameDesc{
         refbit = true;
     }
 
+    public FrameDesc(Page aPage) {
+
+        this.aPage = new Page();
+        this.aPage.copyPage(aPage);
+        dirty = false;
+        valid = false;
+        diskPageNumber = -1;
+        pinCount = -1;
+        refbit = true;
+
+
+    }
+
     /** Gives back the boolean value of if the frame contains data */
     public boolean getValid() {
 
@@ -52,7 +64,30 @@ public class FrameDesc{
     public void setRefbit(boolean refbit) {
 
         this.refbit = refbit;
+        return;
     }
 
+    public boolean getDirty() {
 
+        return dirty;
+    }
+
+    public void setDiskPageNumber(int diskPageNumber) {
+
+        this.diskPageNumber = diskPageNumber;
+        return;
+    }
+
+    public void setDirty(boolean dirty) {
+
+        this.dirty = dirty;
+        return;
+    }
+    public boolean comparePage(Page toCheck) {
+
+        if(aPage.getData() == toCheck.getData())
+            return true;
+        else
+        return false;
+    }
 }

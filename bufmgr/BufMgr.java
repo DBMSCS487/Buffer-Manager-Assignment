@@ -6,6 +6,9 @@ import global.Page;
 import global.PageId;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.Iterator;
 
 /**
  * <h3>Minibase Buffer Manager</h3>
@@ -24,10 +27,10 @@ import java.util.HashMap;
  */
 public class BufMgr implements GlobalConst {
 
-
     private FrameDesc [] frametab;
     private int numframes;
     private Clock replPolicy;
+    protected HashMap<PageId, FrameDesc> bufmap;
 
   /**
    * Constructs a buffer manager by initializing member data.  
@@ -43,6 +46,7 @@ public class BufMgr implements GlobalConst {
         throw new IndexOutOfBoundsException();
 
       }
+
     }
     catch(IndexOutOfBoundsException e) {
 
@@ -54,12 +58,13 @@ public class BufMgr implements GlobalConst {
 
     for(int i = 0; i < numframes; ++i) {
 
-      frametab[i] = new FrameDesc();
+      frametab[i] = null;
 
     }
 
     this.numframes = numframes;
     this.replPolicy = new Clock();
+    this.bufmap = new HashMap<>();
 
   } // public BufMgr(int numframes)
 
@@ -108,8 +113,34 @@ public class BufMgr implements GlobalConst {
   public void unpinPage(PageId pageno, boolean dirty) {
 
 
+      try {
+
+          FrameDesc frame = bufmap.get(pageno);
+          if(frame == null)
+              throw new IllegalArgumentException();
+
+          frame.setDirty(frame.getDirty() || dirty);
+
+      }
+      catch(IllegalArgumentException e) {
+
+          System.err.print(e.getMessage());
+      }
+
   } // public void unpinPage(PageId pageno, boolean dirty)
-  
+
+
+
+    public boolean checkPool(Page toCheck) {
+
+      for(int i = 0; i < numframes; ++i) {
+
+          if(frametab[i] != null && frametab[i].comparePage(toCheck))
+              return true;
+
+      }
+      return false;
+    }
   /**
    * Allocates a run of new disk pages and pins the first one in the buffer pool.
    * The pin will be made using PIN_MEMCPY.  Watch out for disk page leaks.
@@ -123,8 +154,41 @@ public class BufMgr implements GlobalConst {
    */
   public PageId newPage(Page firstpg, int run_size) {
 
-    return null;
+      try {
+          if (checkPool(firstpg))
+              throw new IllegalArgumentException();
 
+          PageId tempPageID = Minibase.DiskManager.allocate_page(run_size);
+          int i = 0;
+          boolean flag = true;
+          while (i < numframes && flag) {
+
+              if (frametab[i] == null) {
+                  frametab[i] = new FrameDesc(firstpg);
+                  frametab[i].setDiskPageNumber(tempPageID.hashCode());
+                  pinPage(tempPageID, firstpg, PIN_MEMCPY);
+                  bufmap.put(tempPageID, frametab[i]);
+                  flag = false;
+              }
+              ++i;
+          }
+
+          if (i == numframes)
+              throw new IllegalStateException();
+          else
+              return tempPageID;
+      }
+      catch(IllegalArgumentException e) {
+
+          System.err.println(e.getMessage());
+      }
+      catch(IllegalStateException e) {
+
+          System.err.println(e.getMessage());
+
+      }
+
+      return null;
   } // public PageId newPage(Page firstpg, int run_size)
 
   /**
@@ -136,6 +200,12 @@ public class BufMgr implements GlobalConst {
   public void freePage(PageId pageno) {
 
 
+     FrameDesc temp = bufmap.get(pageno);
+
+    //Find the pageno
+      //call remove function for diskmanager
+      //remove from hash map
+
   } // public void freePage(PageId firstid)
 
   /**
@@ -146,6 +216,15 @@ public class BufMgr implements GlobalConst {
    */
   public void flushAllFrames() {
 
+
+      for(int i = 0; i < numframes; ++i)
+      {
+          //if(frametab[i] frametab[i].getDirty() == true && frametab[i].getValid() == true) {
+
+
+          //}
+
+      }
 
   } // public void flushAllFrames()
 
