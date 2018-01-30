@@ -166,6 +166,7 @@ public class BufMgr implements GlobalConst {
               if (frametab[i] == null) {
                   frametab[i] = new FrameDesc(firstpg);
                   frametab[i].setDiskPageNumber(tempPageID.hashCode());
+                  frametab[i].setValid(true);
                   pinPage(tempPageID, firstpg, PIN_MEMCPY);
                   bufmap.put(tempPageID, frametab[i]);
                   flag = false;
@@ -217,14 +218,24 @@ public class BufMgr implements GlobalConst {
   public void flushAllFrames() {
 
 
+
       for(int i = 0; i < numframes; ++i)
       {
-          //if(frametab[i] frametab[i].getDirty() == true && frametab[i].getValid() == true) {
+          //Only flush the frame if the bit is dirty and the data is valid
+          if(frametab[i] != null && frametab[i].getDirty() == true && frametab[i].getValid() == true)
+          {
 
+              //Loop through each element in the hash map
+              for(Map.Entry<PageId, FrameDesc> entry : bufmap.entrySet()) {
 
-          //}
-
+                  //Write the page to disk if we find the entry in the hash map
+                  //We needed to loop through the hash map since the write function needs the PageId PageId
+                  if(frametab[i] == entry.getValue())
+                      Minibase.DiskManager.write_page(entry.getKey(), frametab[i].getaPage());
+              }
       }
+
+      return;
 
   } // public void flushAllFrames()
 
@@ -234,9 +245,23 @@ public class BufMgr implements GlobalConst {
    * @throws IllegalArgumentException if the page is not in the buffer pool
    */
   public void flushPage(PageId pageno) {
-	  
 
+      FrameDesc temp = bufmap.get(pageno);
 
+      try {
+
+          if(temp == null)
+              throw new IllegalArgumentException();
+
+          if(temp.getDirty() == true) {
+              Minibase.DiskManager.write_page(pageno, temp.getaPage());
+          }
+      }
+      catch(IllegalArgumentException e) {
+          System.err.println(e.getMessage());
+      }
+
+      return;
   }
 
    /**

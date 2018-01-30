@@ -83,11 +83,21 @@ public class FrameDesc{
         this.dirty = dirty;
         return;
     }
+
     public boolean comparePage(Page toCheck) {
 
-        if(aPage.getData() == toCheck.getData())
+        if (aPage.getData() == toCheck.getData())
             return true;
         else
-        return false;
+            return false;
+    }
+
+    public Page getaPage() {
+
+        return this.aPage;
+    }
+
+    public void setValid(boolean valid) {
+        this.valid = valid;
     }
 }
