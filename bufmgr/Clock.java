@@ -22,12 +22,12 @@ public class Clock {
         for(int counter = 0; counter <  size * 2; ++counter) {
 
 
-            if(bufferPool[current] != null && bufferPool[current].getValid() == false)
-                return counter;
+            if(bufferPool[current].getValid() == false)
+                return current;
 
-            if(bufferPool[current] != null && bufferPool[counter].getPinCount() == 0) {
+            if(bufferPool[current].getPinCount() == 0) {
 
-                if( bufferPool[current] != null && bufferPool[current].getRefbit() == true)
+                if(bufferPool[current].getRefbit() == true)
                     bufferPool[current].setRefbit(false);
                 else
                     return current;

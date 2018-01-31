@@ -7,8 +7,7 @@ import global.PageId;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.Iterator;
+
 
 /**
  * <h3>Minibase Buffer Manager</h3>
@@ -50,7 +49,7 @@ public class BufMgr implements GlobalConst {
     }
     catch(IndexOutOfBoundsException e) {
 
-      System.out.println(e.getMessage());
+        System.err.println("Function: BufMgr constructor\n catch: IndexOutOfBoundsException\n " + e.getMessage() + "\n");
 
     }
 
@@ -58,7 +57,8 @@ public class BufMgr implements GlobalConst {
 
     for(int i = 0; i < numframes; ++i) {
 
-      frametab[i] = null;
+        frametab[i] = new FrameDesc();
+        //frametab[i] = null;
 
     }
 
@@ -98,7 +98,52 @@ public class BufMgr implements GlobalConst {
    */
   public void pinPage(PageId pageno, Page mempage, int contents) {
 
-      int frameno = replPolicy.pickVictim(frametab);
+      try {
+          if (bufmap.containsKey(pageno)) {
+
+              FrameDesc temp = bufmap.get(pageno);
+              temp.incPinCount();
+              return;
+          }
+
+
+          int frameno = replPolicy.pickVictim(frametab);
+          if (frameno == -1)
+              return;
+
+          flushPage(pageno);
+
+          if(!bufmap.isEmpty() && getNumUnpinned() == 0)
+              throw new IllegalStateException();
+
+          if (contents == PIN_DISKIO) {
+              Minibase.DiskManager.read_page(pageno, mempage);
+              frametab[frameno].copyPage(mempage);
+
+              //  frametab[frameno].setDiskPageNumber(pageno.hashCode());
+              //frametab[frameno].setPinCount(1);
+
+
+          } else if (contents == PIN_MEMCPY) {
+
+              if(frametab[frameno].getPinCount() > 0)
+                  throw new IllegalArgumentException();
+
+              frametab[frameno].copyPage(mempage);
+              frametab[frameno].setValid(true);
+              bufmap.put(pageno, frametab[frameno]);
+          }
+      }
+      catch(IllegalArgumentException e) {
+
+         // System.err.println("Function: pinPage\n catch: IllegalArgumentException\n " + e.getMessage() + "\n");
+
+      }
+      catch(IllegalStateException e) {
+
+         // System.err.println("Function: pinPage\n catch: IllegalStateException\n " + e.getMessage() + "\n");
+
+      }
 
   } // public void pinPage(PageId pageno, Page page, int contents)
   
@@ -112,35 +157,30 @@ public class BufMgr implements GlobalConst {
    */
   public void unpinPage(PageId pageno, boolean dirty) {
 
-
       try {
 
-          FrameDesc frame = bufmap.get(pageno);
-          if(frame == null)
+          if(!bufmap.containsKey(pageno))
               throw new IllegalArgumentException();
 
+          FrameDesc frame = bufmap.get(pageno);
+
+          if(frame.getPinCount() == 0)
+              throw new IllegalArgumentException();
+
+
           frame.setDirty(frame.getDirty() || dirty);
+          frame.decPinCount();
 
       }
       catch(IllegalArgumentException e) {
 
-          System.err.print(e.getMessage());
-      }
+          // System.err.println("Function: unpinPage\n catch: IllegalArgumentException\n " + e.getMessage() + "\n");
 
+      }
+      return;
   } // public void unpinPage(PageId pageno, boolean dirty)
 
 
-
-    public boolean checkPool(Page toCheck) {
-
-      for(int i = 0; i < numframes; ++i) {
-
-          if(frametab[i] != null && frametab[i].comparePage(toCheck))
-              return true;
-
-      }
-      return false;
-    }
   /**
    * Allocates a run of new disk pages and pins the first one in the buffer pool.
    * The pin will be made using PIN_MEMCPY.  Watch out for disk page leaks.
@@ -155,37 +195,26 @@ public class BufMgr implements GlobalConst {
   public PageId newPage(Page firstpg, int run_size) {
 
       try {
-          if (checkPool(firstpg))
-              throw new IllegalArgumentException();
 
           PageId tempPageID = Minibase.DiskManager.allocate_page(run_size);
-          int i = 0;
-          boolean flag = true;
-          while (i < numframes && flag) {
-
-              if (frametab[i] == null) {
-                  frametab[i] = new FrameDesc(firstpg);
-                  frametab[i].setDiskPageNumber(tempPageID.hashCode());
-                  frametab[i].setValid(true);
+          if(!bufmap.containsKey(tempPageID))
+              throw new IllegalArgumentException();
+          else {
+              if(getNumUnpinned() == 0)
+                  throw new IllegalStateException();
+              else {
                   pinPage(tempPageID, firstpg, PIN_MEMCPY);
-                  bufmap.put(tempPageID, frametab[i]);
-                  flag = false;
+                  return tempPageID;
               }
-              ++i;
           }
-
-          if (i == numframes)
-              throw new IllegalStateException();
-          else
-              return tempPageID;
       }
       catch(IllegalArgumentException e) {
 
-          System.err.println(e.getMessage());
+          System.err.println("Function: newPage\n catch: IllegalArgumentException\n " + e.getMessage() + "\n");
       }
       catch(IllegalStateException e) {
 
-          System.err.println(e.getMessage());
+          System.err.println("Function: newPage\n catch: IllegalStateException\n " + e.getMessage() + "\n");
 
       }
 
@@ -199,13 +228,29 @@ public class BufMgr implements GlobalConst {
    * @throws IllegalArgumentException if the page is pinned
    */
   public void freePage(PageId pageno) {
+      try {
 
+          if(!bufmap.containsKey(pageno))
+              return;
 
-     FrameDesc temp = bufmap.get(pageno);
+          FrameDesc temp = bufmap.get(pageno);
+          for (int z = 0; z < numframes; ++z) {
+              if (frametab[z] == temp) {
+                  if (frametab[z].getPinCount() > 0) {
+                      throw new IllegalArgumentException();
+                  }
+                  bufmap.remove(pageno);
+                  Minibase.DiskManager.deallocate_page(pageno);
+                  frametab[z].resetFrame();
+              }
+          }
+      }
+      catch(IllegalArgumentException e){
 
-    //Find the pageno
-      //call remove function for diskmanager
-      //remove from hash map
+          System.err.println("Function: freePage\n catch: IllegalArgumentException\n " + e.getMessage() + "\n");
+
+      }
+      return;
 
   } // public void freePage(PageId firstid)
 
@@ -217,24 +262,14 @@ public class BufMgr implements GlobalConst {
    */
   public void flushAllFrames() {
 
+      for (Map.Entry<PageId, FrameDesc> entry : bufmap.entrySet()) {
 
+          if (entry.getValue().getDirty() == true && entry.getValue().getValid() == true){
 
-      for(int i = 0; i < numframes; ++i)
-      {
-          //Only flush the frame if the bit is dirty and the data is valid
-          if(frametab[i] != null && frametab[i].getDirty() == true && frametab[i].getValid() == true)
-          {
+              flushPage(entry.getKey());
+          }
 
-              //Loop through each element in the hash map
-              for(Map.Entry<PageId, FrameDesc> entry : bufmap.entrySet()) {
-
-                  //Write the page to disk if we find the entry in the hash map
-                  //We needed to loop through the hash map since the write function needs the PageId PageId
-                  if(frametab[i] == entry.getValue())
-                      Minibase.DiskManager.write_page(entry.getKey(), frametab[i].getaPage());
-              }
       }
-
       return;
 
   } // public void flushAllFrames()
@@ -246,19 +281,20 @@ public class BufMgr implements GlobalConst {
    */
   public void flushPage(PageId pageno) {
 
-      FrameDesc temp = bufmap.get(pageno);
-
       try {
 
-          if(temp == null)
+          if(!bufmap.containsKey(pageno))
               throw new IllegalArgumentException();
 
-          if(temp.getDirty() == true) {
+          FrameDesc temp = bufmap.get(pageno);
+
+          if(temp.getDirty() == true && temp.getValid() == true) {
               Minibase.DiskManager.write_page(pageno, temp.getaPage());
           }
       }
       catch(IllegalArgumentException e) {
-          System.err.println(e.getMessage());
+
+         // System.err.println("Function: flushPage\n catch: IllegalArgumentException\n " + e.getMessage() + "\n");
       }
 
       return;
@@ -277,7 +313,14 @@ public class BufMgr implements GlobalConst {
    */
   public int getNumUnpinned() {
 
-    return 1;
+
+      int count = 0;
+      for (Map.Entry<PageId, FrameDesc> entry : bufmap.entrySet()) {
+
+          if (entry.getValue().getPinCount() == 0)
+              ++count;
+      }
+      return count;
   }
 
 } // public class BufMgr implements GlobalConst
