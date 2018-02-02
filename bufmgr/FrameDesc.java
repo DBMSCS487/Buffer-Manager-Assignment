@@ -46,7 +46,7 @@ public class FrameDesc{
 
     public void copyPage(Page to_copy){
         
-        this.aPage.copyPage(to_copy);
+        this.aPage.setPage(to_copy);
         return;
     }
     /** Gives back the boolean value of if the frame contains data */
