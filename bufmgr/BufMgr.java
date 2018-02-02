@@ -100,49 +100,52 @@ public class BufMgr implements GlobalConst {
 
       try {
           if (bufmap.containsKey(pageno)) {
-
               FrameDesc temp = bufmap.get(pageno);
               temp.incPinCount();
               return;
           }
 
-
           int frameno = replPolicy.pickVictim(frametab);
+
           if (frameno == -1)
-              return;
+              System.err.print("Frame Number does not exist");
+          else{
+              for (Map.Entry<PageId, FrameDesc> entry : bufmap.entrySet()) {
+                  if (entry.getValue() == frametab[frameno]){
+                      flushPage(entry.getKey());
+                  }
+              }
+          }
 
-          flushPage(pageno);
-
-          if(!bufmap.isEmpty() && getNumUnpinned() == 0)
+          if(bufmap.size() > 0 && getNumUnpinned() == 0)
               throw new IllegalStateException();
 
+          // put into hash map
+          // put it in the array
+          // increment pin count
+          // set dirty to false
+          // return address of frame
           if (contents == PIN_DISKIO) {
               Minibase.DiskManager.read_page(pageno, mempage);
               frametab[frameno].copyPage(mempage);
-
-              //  frametab[frameno].setDiskPageNumber(pageno.hashCode());
-              //frametab[frameno].setPinCount(1);
-
+              frametab[frameno].setDirty(false);
+              frametab[frameno].setDiskPageNumber(pageno.pid);
+              bufmap.put(pageno, frametab[frameno]);
 
           } else if (contents == PIN_MEMCPY) {
-
               if(frametab[frameno].getPinCount() > 0)
                   throw new IllegalArgumentException();
-
+              frametab[frameno].setDiskPageNumber(pageno.pid);
               frametab[frameno].copyPage(mempage);
               frametab[frameno].setValid(true);
               bufmap.put(pageno, frametab[frameno]);
           }
       }
       catch(IllegalArgumentException e) {
-
-         // System.err.println("Function: pinPage\n catch: IllegalArgumentException\n " + e.getMessage() + "\n");
-
+          // System.err.println("Function: pinPage\n catch: IllegalArgumentException\n " + e.getMessage() + "\n");
       }
       catch(IllegalStateException e) {
-
-         // System.err.println("Function: pinPage\n catch: IllegalStateException\n " + e.getMessage() + "\n");
-
+          // System.err.println("Function: pinPage\n catch: IllegalStateException\n " + e.getMessage() + "\n");
       }
 
   } // public void pinPage(PageId pageno, Page page, int contents)
