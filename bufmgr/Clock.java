@@ -22,15 +22,26 @@ public class Clock {
         for(int counter = 0; counter <  size * 2; ++counter) {
 
 
-            if(bufferPool[current].getValid() == false)
-                return current;
-
+            if(bufferPool[current].getValid() == false) {
+                int value = current;
+                current = (current + 1) % size;
+                return value;
+            }
+            if(bufferPool[current].getDiskPgNum() == -1) {
+                int value = current;
+                current = (current + 1) % size;
+                return value;
+            }
             if(bufferPool[current].getPinCount() == 0) {
 
                 if(bufferPool[current].getRefbit() == true)
                     bufferPool[current].setRefbit(false);
-                else
-                    return current;
+                else {
+                    int value = current;
+                    current = (current + 1) % size;
+                    return value;
+                }
+
             }
             //Increment current but make sure to keep it in the scope of the array size
             current = (current + 1) % size;
