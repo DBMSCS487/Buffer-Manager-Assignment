@@ -49,6 +49,7 @@ class BMTest extends TestDriver {
 
     // Allocate more pages than there are frames in the buffer pool
     boolean status1 = PASS;
+    //int toAlloc = 2;
     int toAlloc = Minibase.BufferManager.getNumFrames() + 1;
     Page pg = new Page();  //refers to the current frame
     PageId firstPid = new PageId();
@@ -93,7 +94,7 @@ class BMTest extends TestDriver {
       // coincidence.
       int data = pid.pid + 99999;
       Convert.setIntValue(data, 0, pg.getData());
-
+      //System.out.println("Value of page data: " + data + "\n");
       try {
         Minibase.BufferManager.unpinPage(pid, UNPIN_DIRTY);
       } catch (Exception e) {
@@ -120,6 +121,8 @@ class BMTest extends TestDriver {
 
       int data = 0;
       data = Convert.getIntValue(0, pg.getData());
+      //System.out.println("Value of page data: " + data + "\n");
+
 
       if (status1 == PASS) {
         if (data != (pid.pid) + 99999) {

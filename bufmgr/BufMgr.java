@@ -1,9 +1,6 @@
 package bufmgr;
 
-import global.GlobalConst;
-import global.Minibase;
-import global.Page;
-import global.PageId;
+import global.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,7 +46,7 @@ public class BufMgr implements GlobalConst {
     }
     catch(IndexOutOfBoundsException e) {
 
-        System.err.println("Function: BufMgr constructor\n catch: IndexOutOfBoundsException\n " + e.getMessage() + "\n");
+        //System.err.println("Function: BufMgr constructor\n catch: IndexOutOfBoundsException\n " + e.getMessage() + "\n");
 
     }
 
@@ -100,7 +97,11 @@ public class BufMgr implements GlobalConst {
 
       try {
           if (bufmap.containsKey(pageno)) {
+
               FrameDesc temp = bufmap.get(pageno);
+              mempage.setPage(temp.getaPage());
+              int tempvar = Convert.getIntValue(0, temp.aPage.getData());
+              int memvar = Convert.getIntValue(0, mempage.getData());
               temp.incPinCount();
               return;
           }
@@ -120,32 +121,38 @@ public class BufMgr implements GlobalConst {
           if(bufmap.size() > 0 && getNumUnpinned() == 0)
               throw new IllegalStateException();
 
-          // put into hash map
-          // put it in the array
-          // increment pin count
-          // set dirty to false
-          // return address of frame
+          if(frametab[frameno].getPinCount() > 0)
+              throw new IllegalArgumentException();
+
           if (contents == PIN_DISKIO) {
               Minibase.DiskManager.read_page(pageno, mempage);
               frametab[frameno].copyPage(mempage);
-              frametab[frameno].setDirty(false);
               frametab[frameno].setDiskPageNumber(pageno.pid);
+              bufmap.remove(pageno);
               bufmap.put(pageno, frametab[frameno]);
+              frametab[frameno].incPinCount();
+              mempage.setPage(frametab[frameno].getaPage());
 
           } else if (contents == PIN_MEMCPY) {
-              if(frametab[frameno].getPinCount() > 0)
-                  throw new IllegalArgumentException();
+
               frametab[frameno].setDiskPageNumber(pageno.pid);
               frametab[frameno].copyPage(mempage);
-              frametab[frameno].setValid(true);
               bufmap.put(pageno, frametab[frameno]);
+              frametab[frameno].incPinCount();
+              mempage.setPage(frametab[frameno].getaPage());
+          }
+          else {
+              mempage.setPage(frametab[frameno].getaPage());
+              return;
           }
       }
       catch(IllegalArgumentException e) {
-          // System.err.println("Function: pinPage\n catch: IllegalArgumentException\n " + e.getMessage() + "\n");
+
+           //System.err.println("Function: pinPage\n catch: IllegalArgumentException\n " + e.getMessage() + "\n");
       }
       catch(IllegalStateException e) {
-          // System.err.println("Function: pinPage\n catch: IllegalStateException\n " + e.getMessage() + "\n");
+
+           //System.err.println("Function: pinPage\n catch: IllegalStateException\n " + e.getMessage() + "\n");
       }
 
   } // public void pinPage(PageId pageno, Page page, int contents)
@@ -177,7 +184,7 @@ public class BufMgr implements GlobalConst {
       }
       catch(IllegalArgumentException e) {
 
-          // System.err.println("Function: unpinPage\n catch: IllegalArgumentException\n " + e.getMessage() + "\n");
+           //System.err.println("Function: unpinPage\n catch: IllegalArgumentException\n " + e.getMessage() + "\n");
 
       }
       return;
@@ -206,6 +213,8 @@ public class BufMgr implements GlobalConst {
               if(getNumUnpinned() == 0)
                   throw new IllegalStateException();
               else {
+                  FrameDesc tempFrame = bufmap.get(tempPageID);
+                  firstpg.setPage(tempFrame.getaPage());
                   pinPage(tempPageID, firstpg, PIN_MEMCPY);
                   return tempPageID;
               }
@@ -213,11 +222,11 @@ public class BufMgr implements GlobalConst {
       }
       catch(IllegalArgumentException e) {
 
-          System.err.println("Function: newPage\n catch: IllegalArgumentException\n " + e.getMessage() + "\n");
+          //System.err.println("Function: newPage\n catch: IllegalArgumentException\n " + e.getMessage() + "\n");
       }
       catch(IllegalStateException e) {
 
-          System.err.println("Function: newPage\n catch: IllegalStateException\n " + e.getMessage() + "\n");
+          //System.err.println("Function: newPage\n catch: IllegalStateException\n " + e.getMessage() + "\n");
 
       }
 
@@ -250,7 +259,7 @@ public class BufMgr implements GlobalConst {
       }
       catch(IllegalArgumentException e){
 
-          System.err.println("Function: freePage\n catch: IllegalArgumentException\n " + e.getMessage() + "\n");
+          //System.err.println("Function: freePage\n catch: IllegalArgumentException\n " + e.getMessage() + "\n");
 
       }
       return;
@@ -297,7 +306,7 @@ public class BufMgr implements GlobalConst {
       }
       catch(IllegalArgumentException e) {
 
-         // System.err.println("Function: flushPage\n catch: IllegalArgumentException\n " + e.getMessage() + "\n");
+          //System.err.println("Function: flushPage\n catch: IllegalArgumentException\n " + e.getMessage() + "\n");
       }
 
       return;

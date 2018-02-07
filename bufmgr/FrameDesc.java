@@ -25,7 +25,7 @@ public class FrameDesc{
 
         aPage = new Page();
         dirty = false;
-        valid = false;
+        valid = true;
         diskPageNumber = -1;
         pinCount = 0;
         refbit = true;
@@ -36,7 +36,7 @@ public class FrameDesc{
         this.aPage = new Page();
         this.aPage.copyPage(aPage);
         dirty = false;
-        valid = false;
+        valid = true;
         diskPageNumber = -1;
         pinCount = 0;// might have to change this later
         refbit = true;
@@ -46,7 +46,7 @@ public class FrameDesc{
 
     public void copyPage(Page to_copy){
         
-        this.aPage.setPage(to_copy);
+        this.aPage.setData(to_copy.getData());
         return;
     }
     /** Gives back the boolean value of if the frame contains data */
@@ -121,7 +121,7 @@ public class FrameDesc{
         aPage = null;
         aPage = new Page();
         dirty = false;
-        valid = false;
+        valid = true;
         diskPageNumber = -1;
         pinCount = -1;
         refbit = true;
@@ -130,5 +130,9 @@ public class FrameDesc{
 
     public void setPinCount(int pinCount) {
         this.pinCount = pinCount;
+    }
+
+    public int getDiskPgNum() {
+        return this.diskPageNumber;
     }
 }
